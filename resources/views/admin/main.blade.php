@@ -29,9 +29,10 @@
         integrity="sha256-+uGLJmmTKOqBr+2E6KDYs/NRsHxSkONXFHUL0fy2O/4=" crossorigin="anonymous">
     <!-- Favicons -->
     {{-- <link href="{{ asset('assets/img/favicon-32x32.png') }}" rel="icon"> --}}
-    <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+    <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
     {{-- FA --}}
     <script src="https://kit.fontawesome.com/087ab49e30.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @yield('css')
 </head> <!--end::Head--> <!--begin::Body-->
 
@@ -63,7 +64,7 @@
                                 </p>
                             </li> <!--end::User Image-->
                             <li class="user-footer">
-                                <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                <a href="/admin/profile" class="btn btn-default btn-flat">Profile</a>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST"
                                     style="display: none;">
                                     @csrf
@@ -81,7 +82,7 @@
         <aside class="app-sidebar bg-success-subtle shadow" data-bs-theme="dark"> <!--begin::Sidebar Brand-->
             <div class="sidebar-brand"> <!--begin::Brand Link--> <a href="{{ route('admin.dashboard') }}"
                     class="brand-link"> <!--begin::Brand Image--> <img
-                        src="{{ asset('storage/logos/school-logo.png') }}" alt="AdminLTE Logo"
+                        src="{{ asset('storage/' . $profilSekolah->logo_sekolah) }}" alt="AdminLTE Logo"
                         class="brand-image opacity-75 shadow"> <!--end::Brand Image--> <!--begin::Brand Text--> <span
                         class="brand-text fw-light fs-6">PPDB SMKN 2 Kalianda</span> <!--end::Brand Text--> </a>
                 <!--end::Brand Link-->
@@ -103,103 +104,87 @@
 
                         <!-- Profil Sekolah -->
                         <li class="nav-item">
-                            <a href="/admin/school-profile"
-                                class="nav-link {{ request()->is('admin/school-profile*') ? 'active' : '' }}">
+                            <a href="/admin/profil-sekolah"
+                                class="nav-link {{ request()->is('admin/profil-sekolah*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-school"></i>
                                 <p>
                                     Profil Sekolah
                                 </p>
                             </a>
                         </li>
-
-                        <!-- Periode Pendaftaran -->
-                        <li class="nav-item">
-                            <a href="/admin/periodes"
-                                class="nav-link {{ request()->is('admin/periodes*') ? 'active' : '' }}">
-                                <i class="nav-icon fa-solid fa-clock"></i>
-                                <p>
-                                    Periode Pendaftaran
-                                </p>
-                            </a>
-                        </li>
-
-                        <!-- Jurusan -->
                         <li
-                            class="nav-item {{ request()->is('admin/jurusan*') || request()->is('admin/periode-jurusan*') ? 'menu-open' : '' }}">
+                            class="nav-item
+                            {{ request()->is('admin/periodes*') ||
+                            request()->is('admin/tests*') ||
+                            request()->is('admin/jadwals*') ||
+                            request()->is('admin/pendaftar*') ||
+                            request()->is('admin/pengumuman*')
+                                ? 'menu-open'
+                                : '' }}">
+
                             <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-book-open"></i>
+                                <i class="nav-icon fas fa-graduation-cap"></i>
                                 <p>
-                                    Jurusan
+                                    PPDB
                                     <i class="nav-arrow bi bi-chevron-right"></i>
                                 </p>
                             </a>
+
                             <ul class="nav nav-treeview">
+
+                                <!-- Periode Pendaftaran -->
                                 <li class="nav-item">
-                                    <a href="/admin/jurusan"
-                                        class="nav-link {{ request()->is('admin/jurusan*') ? 'active' : '' }}">
+                                    <a href="/admin/periodes"
+                                        class="nav-link {{ request()->is('admin/periodes*') ? 'active' : '' }}">
                                         <i class="nav-icon bi bi-circle"></i>
-                                        <p>Master Jurusan</p>
+                                        <p>Periode Pendaftaran</p>
                                     </a>
                                 </li>
+
+                                <!-- Tes -->
                                 <li class="nav-item">
-                                    <a href="/admin/periode-jurusan"
-                                        class="nav-link nav-link {{ request()->is('admin/periode-jurusan*') ? 'active' : '' }}">
+                                    <a href="/admin/tests"
+                                        class="nav-link {{ request()->is('admin/tests*') ? 'active' : '' }}">
                                         <i class="nav-icon bi bi-circle"></i>
-                                        <p>Kuota Jurusan</p>
+                                        <p>Penjadwalan Tes</p>
                                     </a>
                                 </li>
+
+                                <!-- Jadwal -->
+                                <li class="nav-item">
+                                    <a href="/admin/jadwals"
+                                        class="nav-link {{ request()->is('admin/jadwals*') ? 'active' : '' }}">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Jadwal</p>
+                                    </a>
+                                </li>
+
+                                <!-- Pendaftar -->
+                                <li class="nav-item">
+                                    <a href="/admin/pendaftar"
+                                        class="nav-link {{ request()->is('admin/pendaftar*') ? 'active' : '' }}">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Pendaftar</p>
+                                    </a>
+                                </li>
+
+                                <!-- Pengumuman -->
+                                <li class="nav-item">
+                                    <a href="/admin/pengumuman"
+                                        class="nav-link {{ request()->is('admin/pengumuman*') ? 'active' : '' }}">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Pengumuman</p>
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
-
-                        <!-- Tes Minat dan Bakat -->
-                        <li class="nav-item">
-                            <a href="/admin/aptitudes"
-                                class="nav-link {{ request()->is('admin/aptitudes*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-clipboard-list"></i>
-                                <p>
-                                    Tes Minat dan Bakat
-                                </p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="/admin/jadwals"
-                                class="nav-link {{ request()->is('admin/jadwals*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-calendar-alt"></i>
-                                <p>
-                                    Jadwal
-                                </p>
-                            </a>
-                        </li>
-
-                        <!-- Pendaftar -->
-                        <li class="nav-item">
-                            <a href="/admin/pendaftar"
-                                class="nav-link {{ request()->is('admin/pendaftar*') ? 'active' : '' }}">
-                                <i class="nav-icon fa-solid fa-id-card"></i>
-                                <p>
-                                    Pendaftar
-                                </p>
-                            </a>
-                        </li>
-
-                        <!-- Pengumuman -->
-                        <li class="nav-item">
-                            <a href="/admin/pengumuman"
-                                class="nav-link {{ request()->is('admin/pengumuman*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-bullhorn"></i>
-                                <p>
-                                    Pengumuman
-                                </p>
-                            </a>
-                        </li>
-
                         <li
                             class="nav-item {{ request()->is('admin/users*') || request()->is('admin/admins*') ? 'menu-open' : '' }}">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
-                                    Pengguna
+                                    Akun Pengguna
                                     <i class="nav-arrow bi bi-chevron-right"></i>
                                 </p>
                             </a>

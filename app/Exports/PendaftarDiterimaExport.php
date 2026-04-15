@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\Pendaftar;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+class PendaftarDiterimaExport implements FromCollection, WithHeadings, WithColumnFormatting
+{
+    protected $periodeId;
+
+    public function __construct($periodeId)
+    {
+        $this->periodeId = $periodeId;
+    }
+
+    public function collection()
+    {
+        $statusMapping = [
+            'pending' => 'Pending',
+            'verified' => 'Terverifikasi',
+            'rejected' => 'Perlu Perbaikan',
+            'diterima' => 'Lulus',
+            'gugur' => 'Tidak Lulus',
+        ];
+
+        $pendaftar = Pendaftar::whereIn('status_pendaftaran', ['diterima'])
+            ->where('periode_id', $this->periodeId)
+            ->orderBy('nilai_akhir', 'desc')
+            ->get();
+
+        return $pendaftar->map(function ($item, $index) use ($statusMapping) {
+            return [
+                'No' => $index + 1,
+                'Nomor Pendaftaran' => $item->nomor_pendaftaran,
+                'NISN' => (string) $item->nisn,
+                'Nama Lengkap' => $item->nama_lengkap,
+                'Jenis Kelamin' => $item->jenis_kelamin,
+                'Asal Sekolah' => $item->asal_sekolah,
+                'Nilai Akhir' => $item->nilai_akhir,
+                'Status Pendaftaran' => $statusMapping[$item->status_pendaftaran] ?? ucfirst($item->status_pendaftaran),
+            ];
+        });
+    }
+
+    public function headings(): array
+    {
+        return [
+            'No',
+            'Nomor Pendaftaran',
+            'NISN',
+            'Nama Lengkap',
+            'Jenis Kelamin',
+            'Asal Sekolah',
+            'Nilai Akhir',
+            'Status Pendaftaran',
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => NumberFormat::FORMAT_TEXT, // Kolom ke-3: NISN
+        ];
+    }
+}

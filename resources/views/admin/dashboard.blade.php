@@ -31,11 +31,11 @@
                         <!--begin::Small Box Widget 1-->
                         <div class="small-box text-bg-primary">
                             <div class="inner">
-                                <h3>10</h3>
+                                <h3>{{ $totalPendaftar }}</h3>
                                 <p>Jumlah Pendaftar</p>
                             </div>
                             <i class="fa fa-users small-box-icon"></i>
-                            <a href="#"
+                            <a href="{{ route('admin.pendaftar.index') }}"
                                 class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -49,11 +49,11 @@
                         <!--begin::Small Box Widget 2-->
                         <div class="small-box text-bg-success">
                             <div class="inner">
-                                <h3>10</h3>
-                                <p>Pendaftar Diterima</p>
+                                <h3>{{ $totalDiterima }}</h3>
+                                <p>Pendaftar Lulus</p>
                             </div>
                             <i class="fa fa-check small-box-icon"></i>
-                            <a href="#"
+                            <a href="{{ route('admin.pendaftar.index') }}"
                                 class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -67,11 +67,11 @@
                         <!--begin::Small Box Widget 3-->
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3>10</h3>
-                                <p>Pendaftar Gugur</p>
+                                <h3>{{ $totalGugur }}</h3>
+                                <p>Pendaftar Tidak Lulus</p>
                             </div>
                             <i class="fa fa-times small-box-icon"></i>
-                            <a href="#"
+                            <a href="{{ route('admin.pendaftar.index') }}"
                                 class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -85,11 +85,11 @@
                         <!--begin::Small Box Widget 4-->
                         <div class="small-box text-bg-info">
                             <div class="inner">
-                                <h3>10</h3>
-                                <p>Jumlah Jurusan</p>
+                                <h3>{{ $totalPending }}</h3>
+                                <p>Pendaftar Pending</p>
                             </div>
                             <i class="fas fa-list small-box-icon"></i>
-                            <a href="#"
+                            <a href="{{ route('admin.pendaftar.index') }}"
                                 class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -99,17 +99,45 @@
                     <!--end::Col-->
                 </div>
                 <!--end::Row-->
-                <!-- Informasi Sekolah -->
-                {{-- <div class="row justify-content-center my-3">
-                    <div class="col-lg-6 text-center">
-                        <img src="{{ asset('storage/' . $schoolProfile->logo_sekolah) }}" alt="Logo Sekolah"
-                            class="img-fluid mb-1" style="max-width: 100px;">
-                        <h4>{{ $schoolProfile->nama_sekolah }}</h4>
-                        <p class="mb-0">{{ $schoolProfile->alamat_sekolah }}</p>
-                        <p class="mb-0">{{ $schoolProfile->email_sekolah }}</p>
-                        <p>NPSN: {{ $schoolProfile->npsn }}</p>
+
+                <div class="row">
+                    <!-- Diagram Line (Lebih Lebar) -->
+                    <div class="col-md-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Grafik Pendaftar</h3>
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center"
+                                style="min-height: 300px;">
+                                <canvas id="pendaftarChart"></canvas>
+                            </div>
+                        </div>
                     </div>
-                </div> --}}
+
+                    <!-- Diagram Gender (Lebih Kecil) -->
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h3 class="card-title">Pendaftar (L/P) Tahun {{ $tahunSekarang }}</h3>
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center"
+                                style="min-height: 300px;">
+                                <canvas id="genderChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card my-3">
+                    <div class="card-body text-center">
+                        <img src="{{ asset('storage/' . $profilSekolah->logo_sekolah) }}" alt="Logo Sekolah"
+                            class="img-fluid mb-1" style="max-width: 100px;">
+                        <h4>{{ $profilSekolah->nama_sekolah }}</h4>
+                        <p class="mb-0">{{ $profilSekolah->alamat_sekolah }}</p>
+                        <p class="mb-0">{{ $profilSekolah->email_sekolah }}</p>
+                        <p>NPSN: {{ $profilSekolah->npsn }}</p>
+                    </div>
+                </div>
             </div>
             <!--end::Container-->
         </div>
@@ -132,5 +160,76 @@
             var toastError = new bootstrap.Toast(document.getElementById('toastDanger'));
             toastError.show();
         @endif
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let tahun = {!! json_encode(array_keys($pendaftarPerTahun)) !!}; // Tahun
+            let jumlahPendaftar = {!! json_encode(array_values($pendaftarPerTahun)) !!}; // Total pendaftar
+            let jumlahDiterima = {!! json_encode(array_values($diterimaPerTahun)) !!}; // Total diterima
+            let jumlahGugur = {!! json_encode(array_values($gugurPerTahun)) !!}; // Total gugur
+
+            let ctx = document.getElementById('pendaftarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tahun, // Tahun sebagai label sumbu X
+                    datasets: [{
+                            label: 'Total Pendaftar',
+                            data: jumlahPendaftar,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderWidth: 2,
+                            fill: true
+                        },
+                        {
+                            label: 'Lulus',
+                            data: jumlahDiterima,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'Tidak Lulus',
+                            data: jumlahGugur,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderWidth: 2,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 25
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById('genderChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Laki-laki', 'Perempuan'],
+                    datasets: [{
+                        data: [{{ $totalLakiLaki }}, {{ $totalPerempuan }}],
+                        backgroundColor: ['#36A2EB', '#FF6384']
+                    }]
+                }
+            });
+        });
     </script>
 @endsection

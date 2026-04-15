@@ -30,7 +30,6 @@ return new class extends Migration
             $table->string('foto_calon_siswa')->nullable();
             $table->string('kartu_keluarga')->nullable();
             $table->string('akte_kelahiran')->nullable();
-            $table->string('kip')->nullable();
             $table->text('catatan_penolakan')->nullable();
             $table->unsignedBigInteger('periode_id');
             $table->unsignedBigInteger('test_id')->nullable();

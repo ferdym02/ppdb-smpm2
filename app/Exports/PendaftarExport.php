@@ -1,0 +1,102 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\Pendaftar;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Illuminate\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+
+class PendaftarExport implements FromCollection, WithHeadings, WithColumnFormatting
+{
+    protected $filters;
+
+    public function __construct($filters)
+    {
+        $this->filters = $filters;
+    }
+
+    public function collection()
+    {
+        $query = Pendaftar::with('periode') // Load relasi periode
+            ->select('pendaftars.*'); // Ambil semua kolom dari tabel pendaftar
+
+        // Filter berdasarkan permintaan
+        if (!empty($this->filters['periode'])) {
+            $query->where('periode_id', $this->filters['periode']);
+        }
+        if (!empty($this->filters['status_pendaftaran'])) {
+            $query->where('status_pendaftaran', $this->filters['status_pendaftaran']);
+        }
+        if (!empty($this->filters['jeni_kelamin'])) {
+            $query->where('jenis_kelamin', $this->filters['jenis_kelamin']);
+        }
+        // Filter berdasarkan tanggal pendaftaran
+        if (!empty($this->filters['start_date']) && !empty($this->filters['end_date'])) {
+            $query->whereBetween('created_at', [$this->filters['start_date'], $this->filters['end_date']]);
+        } elseif (!empty($this->filters['start_date'])) {
+            $query->whereDate('created_at', '>=', $this->filters['start_date']);
+        } elseif (!empty($this->filters['end_date'])) {
+            $query->whereDate('created_at', '<=', $this->filters['end_date']);
+        }
+
+        // Ambil data dan urutkan berdasarkan periode dan id
+        $data = $query->orderBy('periode_id')->orderBy('id', 'asc')->get();
+
+        // Mapping status pendaftaran
+        $statusMapping = [
+            'pending' => 'Pending',
+            'verified' => 'Terverifikasi',
+            'rejected' => 'Perlu Perbaikan',
+            'diterima' => 'Lulus',
+            'gugur' => 'Tidak Lulus',
+        ];
+
+        // Kelompokkan berdasarkan periode
+        $groupedData = $data->groupBy('periode_id');
+
+        $finalData = new Collection();
+        foreach ($groupedData as $periodeId => $pendaftarList) {
+            $periodeNama = optional($pendaftarList->first()->periode)->tahun_pelajaran ?? 'Periode Tidak Diketahui';
+
+            // Tambahkan header periode
+            $finalData->push(['Periode: ' . $periodeNama, '', '', '', '', '', '']);
+
+            // Tambahkan header tabel setelah setiap periode
+            $finalData->push([
+                'No', 'Nomor Pendaftaran', 'NISN', 'Nama Lengkap', 'Jenis Kelamin', 'Asal Sekolah', 'Status Pendaftaran'
+            ]);
+
+            // Tambahkan data pendaftar
+            foreach ($pendaftarList as $index => $item) {
+                $status = $statusMapping[$item->status_pendaftaran] ?? $item->status_pendaftaran;
+
+                $finalData->push([
+                    $index + 1,
+                    $item->nomor_pendaftaran,
+                    $item->nisn,
+                    $item->nama_lengkap,
+                    $item->jenis_kelamin,
+                    $item->asal_sekolah,
+                    $status,
+                ]);
+            }
+        }
+
+        return $finalData;
+    }
+
+    public function headings(): array
+    {
+        return []; // Header sudah ditangani dalam collection()
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'C' => NumberFormat::FORMAT_TEXT, // Kolom C = NISN
+        ];
+    }
+}

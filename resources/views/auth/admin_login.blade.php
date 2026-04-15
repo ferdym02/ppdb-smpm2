@@ -23,8 +23,7 @@
     <!--end::Third Party Plugin(Bootstrap Icons)--><!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.css') }}"><!--end::Required Plugin(AdminLTE)-->
     <!-- Favicons -->
-    {{-- <link href="{{ asset('assets/img/favicon-32x32.png') }}" rel="icon"> --}}
-    <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+    <link rel="icon" type="image/png" href="assets/img/favicon.png">
     <style>
         /* Spinner Loading Overlay */
         .loading-overlay {

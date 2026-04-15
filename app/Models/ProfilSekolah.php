@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class ProfilSekolah extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'nama_sekolah',
+        'npsn',
+        'alamat_sekolah',
+        'email_sekolah',
+        'telepon_sekolah',
+        'logo_sekolah',
+        'call_center',
+    ];
 }

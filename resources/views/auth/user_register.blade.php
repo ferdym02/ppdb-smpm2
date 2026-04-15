@@ -1,43 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <title>Daftar Akun Calon Siswa</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--===============================================================================================-->
-    <link rel="icon" type="image/png" href="images/icons/favicon.ico" />
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/vendor/bootstrap/css/bootstrap.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/vendor/animate/animate.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/vendor/css-hamburgers/hamburgers.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/vendor/select2/select2.min.css">
-    <!--===============================================================================================-->
-    <link rel="stylesheet" type="text/css" href="login_assets/css/util.css">
-    <link rel="stylesheet" type="text/css" href="login_assets/css/main.css">
-    <!--===============================================================================================-->
-</head>
-
-<body>
-
+@section('content')
     <div class="limiter">
         <div class="container-login100">
             <div class="wrap-login100">
                 <div class="login100-pic js-tilt" data-tilt>
-                    <img src="login_assets/images/img-01.png" alt="IMG">
+                    <img src="{{ asset('storage/' . $profilSekolah->logo_sekolah) }}" alt="IMG">
                 </div>
 
-                <form class="login100-form validate-form" method="POST" action="/register">
+                <form id="registerForm" class="login100-form validate-form" method="POST" action="/register">
                     @csrf
 
                     <span class="login100-form-title">
                         Daftar Akun Calon Siswa
                     </span>
+
+                    {{-- ================= ALERT ERROR UMUM ================= --}}
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between align-items-center"
+                            role="alert">
+                            <div>{{ session('error') }}</div>
+                            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
+
+
+                    {{-- ================= ALERT VALIDASI ================= --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-between align-items-center"
+                            role="alert">
+                            <div>
+                                @foreach ($errors->all() as $error)
+                                    {{ $error }}<br>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
 
                     <!-- Nama Lengkap -->
                     <div class="wrap-input100 validate-input" data-validate="Nama lengkap wajib diisi">
@@ -77,7 +78,7 @@
                     </div>
 
                     <div class="container-login100-form-btn">
-                        <button class="login100-form-btn">
+                        <button class="login100-form-btn" style="background: #007A3E">
                             Daftar Akun
                         </button>
                     </div>
@@ -95,41 +96,44 @@
             </div>
         </div>
     </div>
+    <div class="loading-overlay">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+@endsection
 
-    <!--===============================================================================================-->
-    <script src="login_assets/vendor/jquery/jquery-3.2.1.min.js"></script>
-    <!--===============================================================================================-->
-    <script src="login_assets/vendor/bootstrap/js/popper.js"></script>
-    <script src="login_assets/vendor/bootstrap/js/bootstrap.min.js"></script>
-    <!--===============================================================================================-->
-    <script src="login_assets/vendor/select2/select2.min.js"></script>
-    <!--===============================================================================================-->
-    <script src="login_assets/vendor/tilt/tilt.jquery.min.js"></script>
+@section('scripts')
     <script>
-        $('.js-tilt').tilt({
-            scale: 1.1
-        })
-    </script>
-    <!--===============================================================================================-->
-    <script src="login_assets/js/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Jika ada sesi login sukses, tampilkan SweetAlert
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Daftar Akun Berhasil',
-                text: '{{ session('success') }}',
-                timer: 1000, // Durasi 1 detik sebelum dialihkan
-                showConfirmButton: false,
-                didClose: () => {
-                    // Redirect setelah SweetAlert ditutup
-                    window.location.href = "{{ url('/login') }}";
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+
+            let isValid = true;
+
+            // Ambil semua input di dalam form
+            let inputs = this.querySelectorAll('.input100');
+
+            inputs.forEach(function(input) {
+                if (input.value.trim() === '') {
+                    isValid = false;
                 }
             });
-        @endif
+
+            // Cek password sama atau tidak
+            let password = this.querySelector('input[name="password"]').value;
+            let confirm = this.querySelector('input[name="password_confirmation"]').value;
+
+            if (password !== confirm) {
+                isValid = false;
+            }
+
+            // Kalau tidak valid → hentikan submit & jangan tampilkan loading
+            if (!isValid) {
+                e.preventDefault();
+                return;
+            }
+
+            // Kalau valid → tampilkan loading
+            document.querySelector('.loading-overlay').style.display = 'flex';
+        });
     </script>
-
-</body>
-
-</html>
+@endsection
