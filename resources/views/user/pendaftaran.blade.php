@@ -12,16 +12,22 @@
 
 @section('content')
     @if (!$isRegistrationOpen)
-        <div class="row mt-3">
-            <div class="col-md-6 mx-auto">
-                <div class="card mb-4 shadow-sm" id="info">
-                    <div class="card-header text-white">
-                        <h5 class="card-title mb-0">Info Penting</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-danger" role="alert">
-                            Saat ini belum ada periode pendaftaran yang dibuka.
+        <div class="row justify-content-center my-5">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body text-center py-5">
+
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-circle fa-4x text-danger"></i>
                         </div>
+
+                        <h4 class="mb-3">Pendaftaran Belum Dibuka</h4>
+
+                        <p class="text-muted mb-4">
+                            Saat ini belum ada periode pendaftaran yang dibuka.
+                            Silakan tunggu informasi selanjutnya dari pihak sekolah.
+                        </p>
+
                     </div>
                 </div>
             </div>
