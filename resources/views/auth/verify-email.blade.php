@@ -11,7 +11,7 @@
                 </div>
 
                 {{-- CONTENT --}}
-                <form class="login100-form validate-form">
+                <div class="login100-form validate-form">
 
                     <span class="login100-form-title">
                         Verifikasi Email
@@ -56,7 +56,7 @@
                             </form>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
